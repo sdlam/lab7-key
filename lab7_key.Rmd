@@ -58,7 +58,7 @@ model_1 <- lm(data = penguins, body_mass_g ~ flipper_length_mm + bill_depth_mm)
 model_1 # call model by name to return only the coefficeints
 
 #More information 
-summary()
+summary(model_1)
 ```
 
 If everything else is held constant, we expect that for each 1mm increase in flipper length, penguin body mass is expected to increae by `r round(model_1$coefficient[2],2)`g, on average. 
@@ -104,8 +104,20 @@ Use the plot() function.
 
 ```{r}
 plot(model_2)
+
+summary(model_2)
 ```
 
+## Report the model outputs in a summary table
 
+Use modelsummary:
+```{r}
+modelsummary(model_2)
+```
+
+Use stargazer: 
+```{r, results = "asis"}
+stargazer(model_2, type = "html")
+```
 
 
