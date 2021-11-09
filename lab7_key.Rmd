@@ -1,0 +1,111 @@
+---
+title: "esm206 lab 7"
+author: "Sarah Lam"
+date: "11/9/2021"
+output: html_document
+---
+
+```{r setup, include= TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(palmerpenguins)
+library(GGally)
+library(broom)
+library(kableExtra)
+library(modelsummary)
+library(stargazer)
+```
+
+## Explore penguins
+
+Use `GGally::ggpairs()` to create a pairs plot. 
+
+```{r}
+ggpairs(penguins)
+```
+
+That's kind of overkill. :et's simplify the variable that we include in our ggpairs plot: 
+
+- species
+- bill_length_mm through body_mass_g
+
+```{r}
+penguins %>% 
+  select(species, bill_length_mm:body_mass_g) %>% 
+  ggpairs(aes(color = species))
+```
+
+## Multiple linear regression
+
+We are going to try to undersatnd (a bit better) the relationships between multiple predictor variables and an outcome variable which is body mass. 
+
+The different preductor variable we're going to try are: 
+
+- species
+- flipper length
+- sex
+- bill depth 
+
+### Model 1 
+
+Model body mass based on only flopper length and bill depth. 
+(bad idea...there are important variables missing.)
+
+```{r}
+model_1 <- lm(data = penguins, body_mass_g ~ flipper_length_mm + bill_depth_mm)
+
+model_1 # call model by name to return only the coefficeints
+
+#More information 
+summary()
+```
+
+If everything else is held constant, we expect that for each 1mm increase in flipper length, penguin body mass is expected to increae by `r round(model_1$coefficient[2],2)`g, on average. 
+
+R-spqaured interpratatin: 
+76% of variance in penguin body mass is explained by this model (containing flipper length and bill depth).
+
+Actually -- we think that a model for penguin body mass should contain variable speices, flipper length, and penguin sex. 
+```{r}
+model_2 <-  lm(data = penguins, body_mass_g ~ flipper_length_mm + species + sex)
+
+# let's check out the coefficients
+model_2
+
+# Try interpretting doefficients for:
+# flipper length, Gentoo, and male
+```
+
+## Visualize this model 
+
+```{r}
+ggplot(data = penguins, aes(flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species)) +
+  facet_wrap(~sex)
+```
+
+## A couple ways to get and report MLR outcomes 
+
+Use broom::tidy() to get model doefficient info in a data frame 
+
+```{r}
+penguin_model2_coef <- tidy(model_2)
+
+penguin_model2_coef 
+```
+
+Try to write inline code that spits out the coefficient for Gentoo
+Gentoo coefficient in model 2 is `r round(penguin_model2_coef$estimate[4], 2)`. 
+
+## Look at model diagnostics 
+
+Use the plot() function. 
+
+```{r}
+plot(model_2)
+```
+
+
+
+
